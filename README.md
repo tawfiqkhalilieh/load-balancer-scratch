@@ -1,0 +1,68 @@
+# Load Balancer in Go  
+*An implementation built to getting a deeper understanding in concurrency and system design.*
+
+## Patterns implemented in this project:
+- Round Robin Load Balancing
+- Least Connections Load Balancing
+- Health Checks for backend servers
+
+## How to run the project:
+1. Make sure you have Python & Go installed on your machine.
+2. Clone the repository:
+    ```bash
+    git clone git@github.com:tawfiqkhalilieh/load-balancer-scratch.git
+    cd load-balancer-scratch
+    ```
+
+2. Install dependencies ( for the load balancer ):
+    ```bash
+    go mod tidy
+    ```
+
+3. Install dependencies ( for the dummy backend servers ):
+    ```bash
+    cd dummy-service
+    python -m venv env
+    source env/bin/activate  # On Windows use `env\Scripts\activate`
+    pip install -r fastapi uvicorn
+    ```
+
+4. Start the dummy backend servers:
+    ```bash
+    uvicorn dummy_service:app --port 4001 &
+    uvicorn dummy_service:app --port 4002 &
+    uvicorn dummy_service:app --port 4003 &
+```
+
+5. Choose the pattern and number of services for the load balancer in `main.go`:
+    ```go
+    patterns := make(map[string]bool)
+	patterns["roundrobin"] = false // set to true to enable Round Robin
+	patterns["leastconn"] = true // set to true to enable Least Connections
+
+	deployedServices := setupServices("localhost", 2)
+```
+
+6. Run the load balancer:
+    ```bash
+    go run main.go
+    ```
+
+7. Send requests to the load balancer:
+    ```bash
+    curl http://localhost:8080/message
+    ```
+
+
+8. Send concurrent requests to test load balancing:
+    ```bash
+    for i in {1..10}; do curl http://localhost:8080/message & done
+    wait
+    ```
+
+
+## Notes:
+- The load balancer listens on port `8080` by default.
+- The dummy backend servers listen on ports `4001`, `4002`, and `400{n}`.
+- This project was built for educational purposes to understand load balancing concepts and Go concurrency patterns, it is not ready for production use.
+
